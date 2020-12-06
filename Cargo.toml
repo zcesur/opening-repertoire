@@ -1,0 +1,8 @@
+[package]
+name = "opening-repertoire"
+version = "0.1.0"
+authors = ["Zafer Cesur <17045339+zcesur@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+pgn-reader = "0.15.0"
