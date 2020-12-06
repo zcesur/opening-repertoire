@@ -1,4 +1,4 @@
-use pgn_reader::{BufferedReader, Color, San};
+use pgn_reader::{BufferedReader, Color, SanPlus};
 use repertoire::GameVisitor;
 use std::fs::File;
 use tree::Tree;
@@ -15,7 +15,7 @@ fn try_main() -> Result<()> {
     let max_moves = 10;
     let starting_moves = ["e4", "c5"]
         .iter()
-        .map(|s| s.parse::<San>().map_err(|e| e.into()))
+        .map(|s| s.parse::<SanPlus>().map_err(|e| e.into()))
         .collect::<Result<Vec<_>>>()?;
     let mut visitor = GameVisitor::new(
         &mut opening_tree,
