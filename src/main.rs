@@ -24,6 +24,7 @@ fn try_main() -> Result<()> {
         max_moves,
     );
     reader.read_all(&mut visitor)?;
+    opening_tree.prune(repertoire_color);
     println!("{}", opening_tree);
     Ok(())
 }

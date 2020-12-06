@@ -1,4 +1,4 @@
-use crate::tree::{NodeIndex, Tree};
+use crate::tree::{Colored, NodeIndex, Tree};
 use pgn_reader::{Color, SanPlus, Skip, Visitor};
 use std::fmt;
 
@@ -8,6 +8,12 @@ pub struct ColoredSanPlus(Color, SanPlus);
 impl fmt::Display for ColoredSanPlus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({:?}, {})", self.0, self.1)
+    }
+}
+
+impl Colored for ColoredSanPlus {
+    fn color(&self) -> Color {
+        self.0
     }
 }
 

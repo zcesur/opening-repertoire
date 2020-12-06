@@ -1,3 +1,4 @@
+use pgn_reader::Color;
 use std::fmt;
 
 pub struct Tree<T>
@@ -15,6 +16,13 @@ where
         Self { arena: vec![] }
     }
 
+    pub fn size(&self, idx: NodeIndex) -> usize {
+        1 + self.arena[idx]
+            .children
+            .iter()
+            .fold(0, |acc, &c| acc + self.size(c))
+    }
+
     pub fn get_child_or_insert(&mut self, val: T, parent: NodeIndex) -> NodeIndex {
         match self.get_child(&val, parent) {
             Some(idx) => idx,
@@ -29,7 +37,7 @@ where
         }
     }
 
-    fn get_child(&mut self, val: &T, parent: NodeIndex) -> Option<NodeIndex> {
+    fn get_child(&self, val: &T, parent: NodeIndex) -> Option<NodeIndex> {
         self.arena
             .iter()
             .find(|node| &node.val == val && node.parent == Some(parent))
@@ -75,6 +83,34 @@ where
                 .and_then(|_| self.fmt_rec(last, f, &new_indent, true)),
             None => Ok(()),
         })
+    }
+}
+
+pub trait Colored {
+    fn color(&self) -> Color;
+}
+
+impl<T> Tree<T>
+where
+    T: PartialEq + Colored,
+{
+    pub fn prune(&mut self, color: Color) {
+        let sizes: Vec<_> = (0..self.arena.len()).map(|i| self.size(i)).collect();
+        for node in &mut self.arena {
+            if color == node.val.color() {
+                continue;
+            }
+
+            let pruned_children: Vec<_> = node
+                .children
+                .iter()
+                .max_by_key(|&&i| sizes[i])
+                .iter()
+                .map(|&&i| i)
+                .collect();
+
+            node.children = pruned_children;
+        }
     }
 }
 
