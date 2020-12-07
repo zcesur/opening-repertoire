@@ -1,25 +1,9 @@
-use std::fmt;
-
 use pgn_reader::{Color, SanPlus, Skip, Visitor};
 
-use crate::tree::{Colored, NodeIndex, Tree};
+use crate::color::ColoredSanPlus;
+use crate::tree::{NodeIndex, Tree};
 
-#[derive(PartialEq)]
-pub struct ColoredSanPlus(Color, SanPlus);
-
-impl fmt::Display for ColoredSanPlus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.1)
-    }
-}
-
-impl Colored for ColoredSanPlus {
-    fn color(&self) -> Color {
-        self.0
-    }
-}
-
-pub struct GameVisitor<'a> {
+pub struct PGNVisitor<'a> {
     turn: Color,
     plies: usize,
     skip: Skip,
@@ -30,13 +14,13 @@ pub struct GameVisitor<'a> {
     starting_moves: &'a [SanPlus],
 }
 
-impl<'a> GameVisitor<'a> {
+impl<'a> PGNVisitor<'a> {
     pub fn new(
         tree: &'a mut Tree<ColoredSanPlus>,
         starting_moves: &'a [SanPlus],
         repertoire_color: Color,
         max_moves: usize,
-    ) -> GameVisitor<'a> {
+    ) -> PGNVisitor<'a> {
         Self {
             turn: Color::White,
             plies: 0,
@@ -65,7 +49,7 @@ impl<'a> GameVisitor<'a> {
     }
 }
 
-impl<'a> Visitor for GameVisitor<'a> {
+impl<'a> Visitor for PGNVisitor<'a> {
     type Result = ();
 
     fn begin_game(&mut self) {
@@ -91,7 +75,6 @@ impl<'a> Visitor for GameVisitor<'a> {
             None => self.tree.get_root_or_insert(val),
         };
         self.cursor = Some(new_cursor);
-
         self.plies += 1;
         self.turn = !self.turn;
     }

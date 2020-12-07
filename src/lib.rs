@@ -1,4 +1,5 @@
-mod repertoire;
+mod color;
+mod reader;
 mod tree;
 
 use std::error::Error;
@@ -7,7 +8,8 @@ use std::fs::File;
 use clap::ArgMatches;
 use pgn_reader::{BufferedReader, Color, SanPlus};
 
-use repertoire::{ColoredSanPlus, GameVisitor};
+use color::ColoredSanPlus;
+use reader::PGNVisitor;
 use tree::Tree;
 
 type BoxedError = Box<dyn Error>;
@@ -76,7 +78,7 @@ pub fn run(config: &Config) -> Result<Tree<ColoredSanPlus>> {
     let file = File::open(&config.pgn_path)?;
     let mut reader = BufferedReader::new(file);
     let mut opening_tree = Tree::new();
-    let mut visitor = GameVisitor::new(
+    let mut visitor = PGNVisitor::new(
         &mut opening_tree,
         &config.starting_moves,
         config.color,

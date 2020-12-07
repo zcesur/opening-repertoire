@@ -3,6 +3,8 @@ use std::iter;
 
 use pgn_reader::Color;
 
+use crate::color;
+
 pub struct Tree<T>
 where
     T: PartialEq,
@@ -16,36 +18,6 @@ where
 {
     pub fn new() -> Self {
         Self { arena: vec![] }
-    }
-
-    pub fn depth(&self, idx: NodeIndex) -> usize {
-        match self.arena[idx].parent {
-            Some(p) => 1 + self.depth(p),
-            None => 0,
-        }
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.arena.is_empty()
-    }
-
-    pub fn is_root(&self, idx: NodeIndex) -> bool {
-        idx == 0
-    }
-
-    pub fn is_internal(&self, idx: NodeIndex) -> bool {
-        !self.is_root(idx) && !self.is_leaf(idx)
-    }
-
-    pub fn is_leaf(&self, idx: NodeIndex) -> bool {
-        self.arena[idx].children.is_empty()
-    }
-
-    pub fn size(&self, idx: NodeIndex) -> usize {
-        1 + self.arena[idx]
-            .children
-            .iter()
-            .fold(0, |acc, &c| acc + self.size(c))
     }
 
     pub fn get_child_or_insert(&mut self, val: T, parent: NodeIndex) -> NodeIndex {
@@ -85,39 +57,41 @@ where
         self.arena.push(Node::new(idx, val));
         idx
     }
-}
 
-impl<T> Tree<T>
-where
-    T: PartialEq + std::fmt::Display,
-{
-    fn fmt_rec(
-        &self,
-        idx: &NodeIndex,
-        f: &mut fmt::Formatter<'_>,
-        indent: &str,
-        is_last: bool,
-    ) -> fmt::Result {
-        let node = &self.arena[*idx];
-        let new_indent = indent.to_owned() + if is_last { "  " } else { "|  " };
+    fn depth(&self, idx: NodeIndex) -> usize {
+        match self.arena[idx].parent {
+            Some(p) => 1 + self.depth(p),
+            None => 0,
+        }
+    }
 
-        writeln!(f, "{}+- {}", indent, node.val).and_then(|_| match node.children.split_last() {
-            Some((last, init)) => init
-                .iter()
-                .try_fold((), |_, c| self.fmt_rec(c, f, &new_indent, false))
-                .and_then(|_| self.fmt_rec(last, f, &new_indent, true)),
-            None => Ok(()),
-        })
+    fn is_empty(&self) -> bool {
+        self.arena.is_empty()
+    }
+
+    fn is_root(&self, idx: NodeIndex) -> bool {
+        idx == 0
+    }
+
+    fn is_internal(&self, idx: NodeIndex) -> bool {
+        !self.is_root(idx) && !self.is_leaf(idx)
+    }
+
+    fn is_leaf(&self, idx: NodeIndex) -> bool {
+        self.arena[idx].children.is_empty()
+    }
+
+    fn size(&self, idx: NodeIndex) -> usize {
+        1 + self.arena[idx]
+            .children
+            .iter()
+            .fold(0, |acc, &c| acc + self.size(c))
     }
 }
 
-pub trait Colored {
-    fn color(&self) -> Color;
-}
-
 impl<T> Tree<T>
 where
-    T: PartialEq + Colored + ToString,
+    T: PartialEq + color::Colored + ToString,
 {
     pub fn prune(&mut self, color: Color) {
         let sizes: Vec<_> = (0..self.arena.len()).map(|i| self.size(i)).collect();
@@ -138,7 +112,21 @@ where
         }
     }
 
-    pub fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&T>> {
+    pub fn pgn(&self, color: Color, inode_max_depth: usize) -> String {
+        self.paths(color, inode_max_depth)
+            .iter()
+            .map(|p| {
+                format!(
+                    "[Event \"{}\"]\n{}",
+                    Self::title_from_path(p, color, inode_max_depth),
+                    Self::pgn_from_path(p)
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&T>> {
         if self.is_empty() {
             vec![]
         } else {
@@ -173,38 +161,17 @@ where
         paths
     }
 
-    pub fn pgn(&self, color: Color, inode_max_depth: usize) -> String {
-        self.paths(color, inode_max_depth)
-            .iter()
-            .map(|p| {
-                format!(
-                    "[Event \"{}\"]\n{}",
-                    Self::title_from_path(p, color, inode_max_depth),
-                    Self::pgn_from_path(p)
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n")
-    }
-
-    fn dots(color: Color) -> String {
-        match color {
-            Color::White => String::from("."),
-            Color::Black => String::from("..."),
-        }
-    }
-
-    pub fn title_from_path(path: &[&T], color: Color, inode_max_depth: usize) -> String {
+    fn title_from_path(path: &[&T], color: Color, inode_max_depth: usize) -> String {
         path.iter()
             .enumerate()
             .take(inode_max_depth - 1)
             .filter(|(_, x)| x.color() != color)
             .last()
-            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, Self::dots(x.color()), x.to_string()))
+            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, color::dots(x.color()), x.to_string()))
             .unwrap_or(String::from("Variation"))
     }
 
-    pub fn pgn_from_path(path: &[&T]) -> String {
+    fn pgn_from_path(path: &[&T]) -> String {
         path.iter()
             .map(|&x| x.to_string())
             .collect::<Vec<_>>()
@@ -213,6 +180,30 @@ where
             .map(|(i, xs)| format!("{}. {}", i + 1, xs.join(" ")))
             .collect::<Vec<_>>()
             .join(" ")
+    }
+}
+
+impl<T> Tree<T>
+where
+    T: PartialEq + std::fmt::Display,
+{
+    fn fmt_rec(
+        &self,
+        idx: &NodeIndex,
+        f: &mut fmt::Formatter<'_>,
+        indent: &str,
+        is_last: bool,
+    ) -> fmt::Result {
+        let node = &self.arena[*idx];
+        let new_indent = indent.to_owned() + if is_last { "  " } else { "|  " };
+
+        writeln!(f, "{}+- {}", indent, node.val).and_then(|_| match node.children.split_last() {
+            Some((last, init)) => init
+                .iter()
+                .try_fold((), |_, c| self.fmt_rec(c, f, &new_indent, false))
+                .and_then(|_| self.fmt_rec(last, f, &new_indent, true)),
+            None => Ok(()),
+        })
     }
 }
 
@@ -228,6 +219,7 @@ where
     }
 }
 
+// TODO: use struct wrapper for improved type safety
 pub type NodeIndex = usize;
 
 pub struct Node<T>
