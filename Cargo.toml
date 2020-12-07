@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 pgn-reader = "0.15.0"
+clap = "2.33.3"

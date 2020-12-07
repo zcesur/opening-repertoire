@@ -4,12 +4,14 @@ mod tree;
 use std::error::Error;
 use std::fs::File;
 
+use clap::ArgMatches;
 use pgn_reader::{BufferedReader, Color, SanPlus};
 
 use repertoire::GameVisitor;
 use tree::Tree;
 
-type Result<T> = std::result::Result<T, Box<dyn Error>>;
+type BoxedError = Box<dyn Error>;
+type Result<T> = std::result::Result<T, BoxedError>;
 
 pub struct Config {
     pub pgn_path: String,
@@ -20,16 +22,31 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config> {
-        if args.len() < 6 {
-            return Err("not enough arguments".into());
-        }
+    pub fn new(matches: ArgMatches) -> Result<Config> {
+        let pgn_path = matches
+            .value_of("path")
+            .ok_or::<BoxedError>("invalid path".into())
+            .map(|x| x.to_owned())?;
 
-        let pgn_path = args[1].clone();
-        let starting_moves = starting_moves_from_str(&args[2])?;
-        let color = color_from_str(&args[3])?;
-        let max_moves = args[4].parse::<usize>()?;
-        let inode_max_depth = args[5].parse::<usize>()?;
+        let starting_moves = match matches.value_of("starting_moves") {
+            Some(s) => starting_moves_from_str(s),
+            None => Ok(vec![]),
+        }?;
+
+        let color = matches
+            .value_of("color")
+            .ok_or::<BoxedError>("invalid color".into())
+            .and_then(color_from_str)?;
+
+        let max_moves = matches
+            .value_of("max_moves")
+            .unwrap_or("10")
+            .parse::<usize>()?;
+
+        let inode_max_depth = matches
+            .value_of("inode_max_depth")
+            .unwrap_or("8")
+            .parse::<usize>()?;
 
         Ok(Config {
             pgn_path,
