@@ -1,6 +1,7 @@
-use pgn_reader::Color;
 use std::fmt;
 use std::iter;
+
+use pgn_reader::Color;
 
 pub struct Tree<T>
 where

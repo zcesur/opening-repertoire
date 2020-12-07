@@ -1,6 +1,8 @@
-use crate::tree::{Colored, NodeIndex, Tree};
-use pgn_reader::{Color, SanPlus, Skip, Visitor};
 use std::fmt;
+
+use pgn_reader::{Color, SanPlus, Skip, Visitor};
+
+use crate::tree::{Colored, NodeIndex, Tree};
 
 #[derive(PartialEq)]
 pub struct ColoredSanPlus(Color, SanPlus);
