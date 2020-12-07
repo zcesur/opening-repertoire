@@ -24,6 +24,14 @@ where
         }
     }
 
+    pub fn is_root(&self, idx: NodeIndex) -> bool {
+        idx == 0
+    }
+
+    pub fn is_internal(&self, idx: NodeIndex) -> bool {
+        !self.is_root(idx) && !self.is_leaf(idx)
+    }
+
     pub fn is_leaf(&self, idx: NodeIndex) -> bool {
         self.arena[idx].children.is_empty()
     }
@@ -141,8 +149,7 @@ where
         let new_prefix: Vec<&T> = prefix.iter().map(|&p| p).chain(iter::once(val)).collect();
 
         let mut paths = if node.val.color() == color
-            && idx != 0
-            && (self.depth(idx) < inode_max_depth || self.is_leaf(idx))
+            && (self.is_internal(idx) && self.depth(idx) < inode_max_depth || self.is_leaf(idx))
         {
             vec![new_prefix.clone()]
         } else {
