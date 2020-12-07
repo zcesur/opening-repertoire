@@ -1,5 +1,6 @@
 use pgn_reader::Color;
 use std::fmt;
+use std::iter;
 
 pub struct Tree<T>
 where
@@ -92,7 +93,7 @@ pub trait Colored {
 
 impl<T> Tree<T>
 where
-    T: PartialEq + Colored,
+    T: PartialEq + Colored + ToString,
 {
     pub fn prune(&mut self, color: Color) {
         let sizes: Vec<_> = (0..self.arena.len()).map(|i| self.size(i)).collect();
@@ -111,6 +112,50 @@ where
 
             node.children = pruned_children;
         }
+    }
+
+    pub fn paths(&self, color: Color) -> Vec<Vec<&T>> {
+        self.paths_rec(color, 0, &[])
+    }
+
+    fn paths_rec<'a>(&'a self, color: Color, idx: NodeIndex, prefix: &[&'a T]) -> Vec<Vec<&'a T>> {
+        let node = &self.arena[idx];
+        let val = &node.val;
+        let new_prefix: Vec<&T> = prefix.iter().map(|&p| p).chain(iter::once(val)).collect();
+
+        let mut paths = if node.val.color() == color && idx != 0 {
+            vec![new_prefix.clone()]
+        } else {
+            vec![]
+        };
+        paths.extend(
+            node.children
+                .iter()
+                .flat_map(|&c| self.paths_rec(color, c, &new_prefix))
+                .collect::<Vec<_>>(),
+        );
+        paths
+    }
+
+    pub fn pgn(&self, color: Color) -> String {
+        self.paths(color)
+            .iter()
+            .map(|p| Self::pgn_from_path(p))
+            .zip(iter::repeat(String::from("[]")))
+            .map(|(b, h)| format!("{}\n{}", h, b))
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    pub fn pgn_from_path(path: &[&T]) -> String {
+        path.iter()
+            .map(|&x| x.to_string())
+            .collect::<Vec<_>>()
+            .chunks(2)
+            .enumerate()
+            .map(|(i, xs)| format!("{}. {}", i + 1, xs.join(" ")))
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 }
 

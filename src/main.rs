@@ -25,7 +25,7 @@ fn try_main() -> Result<()> {
     );
     reader.read_all(&mut visitor)?;
     opening_tree.prune(repertoire_color);
-    println!("{}", opening_tree);
+    print!("{}", opening_tree.pgn(repertoire_color));
     Ok(())
 }
 
