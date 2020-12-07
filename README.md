@@ -30,6 +30,15 @@ OPTIONS:
     -s, --starting_moves <STRING>    Filter games by some comma-separated starting moves, e.g. 'e4,c5'
 ```
 
+Example
+-------
+Let's build a white repertoire against the [Sicilian Defence](https://en.wikipedia.org/wiki/Sicilian_Defence) (1. e4 c5):
+
+```bash
+wget https://raw.githubusercontent.com/zcesur/opening-repertoire/master/data/ericrosen-white.pgn
+opening-repertoire -p ericrosen-white.pgn -c white -s e4,c5
+```
+
 Contributing
 ------------
 Pull requests are welcome!
