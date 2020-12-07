@@ -1,35 +1,18 @@
-use pgn_reader::{BufferedReader, Color, SanPlus};
-use repertoire::GameVisitor;
-use std::fs::File;
-use tree::Tree;
-mod repertoire;
-mod tree;
+use std::env;
+use std::process;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
-fn try_main() -> Result<()> {
-    let file = File::open("data/ericrosen-white.pgn")?;
-    let mut reader = BufferedReader::new(file);
-    let mut opening_tree = Tree::new();
-    let repertoire_color = Color::White;
-    let max_moves = 10;
-    let inode_max_depth = 8;
-    let starting_moves = ["e4", "c5"]
-        .iter()
-        .map(|s| s.parse::<SanPlus>().map_err(|e| e.into()))
-        .collect::<Result<Vec<_>>>()?;
-    let mut visitor = GameVisitor::new(
-        &mut opening_tree,
-        &starting_moves,
-        repertoire_color,
-        max_moves,
-    );
-    reader.read_all(&mut visitor)?;
-    opening_tree.prune(repertoire_color);
-    print!("{}", opening_tree.pgn(repertoire_color, inode_max_depth));
-    Ok(())
-}
+use opening_repertoire::Config;
 
 fn main() {
-    try_main().unwrap();
+    let args: Vec<String> = env::args().collect();
+
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        eprintln!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
+
+    if let Err(e) = opening_repertoire::run(config) {
+        eprintln!("Application error: {}", e);
+        process::exit(1);
+    }
 }
