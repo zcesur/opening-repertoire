@@ -5,10 +5,10 @@ use clap::{App, Arg};
 use opening_repertoire::Config;
 
 fn main() {
-    let matches = App::new("opening-repertoire")
-        .version("0.1.0")
-        .author("Zafer Cesur")
-        .about("Generates a chess opening repertoire from a PGN")
+    let matches = App::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author(env!("CARGO_PKG_AUTHORS"))
+        .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
             Arg::with_name("color")
                 .short("c")
