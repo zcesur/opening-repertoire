@@ -117,7 +117,7 @@ where
             .iter()
             .map(|p| {
                 format!(
-                    "[Event \"{}\"]\n{}",
+                    "[Event \"{}\"]\n{}\n",
                     Self::title_from_path(p, color, inode_max_depth),
                     Self::pgn_from_path(p)
                 )
