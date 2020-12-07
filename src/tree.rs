@@ -17,6 +17,17 @@ where
         Self { arena: vec![] }
     }
 
+    pub fn depth(&self, idx: NodeIndex) -> usize {
+        match self.arena[idx].parent {
+            Some(p) => 1 + self.depth(p),
+            None => 0,
+        }
+    }
+
+    pub fn is_leaf(&self, idx: NodeIndex) -> bool {
+        self.arena[idx].children.is_empty()
+    }
+
     pub fn size(&self, idx: NodeIndex) -> usize {
         1 + self.arena[idx]
             .children
@@ -114,16 +125,25 @@ where
         }
     }
 
-    pub fn paths(&self, color: Color) -> Vec<Vec<&T>> {
-        self.paths_rec(color, 0, &[])
+    pub fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&T>> {
+        self.paths_rec(color, inode_max_depth, 0, &[])
     }
 
-    fn paths_rec<'a>(&'a self, color: Color, idx: NodeIndex, prefix: &[&'a T]) -> Vec<Vec<&'a T>> {
+    fn paths_rec<'a>(
+        &'a self,
+        color: Color,
+        inode_max_depth: usize,
+        idx: NodeIndex,
+        prefix: &[&'a T],
+    ) -> Vec<Vec<&'a T>> {
         let node = &self.arena[idx];
         let val = &node.val;
         let new_prefix: Vec<&T> = prefix.iter().map(|&p| p).chain(iter::once(val)).collect();
 
-        let mut paths = if node.val.color() == color && idx != 0 {
+        let mut paths = if node.val.color() == color
+            && idx != 0
+            && (self.depth(idx) < inode_max_depth || self.is_leaf(idx))
+        {
             vec![new_prefix.clone()]
         } else {
             vec![]
@@ -131,14 +151,14 @@ where
         paths.extend(
             node.children
                 .iter()
-                .flat_map(|&c| self.paths_rec(color, c, &new_prefix))
+                .flat_map(|&c| self.paths_rec(color, inode_max_depth, c, &new_prefix))
                 .collect::<Vec<_>>(),
         );
         paths
     }
 
-    pub fn pgn(&self, color: Color) -> String {
-        self.paths(color)
+    pub fn pgn(&self, color: Color, inode_max_depth: usize) -> String {
+        self.paths(color, inode_max_depth)
             .iter()
             .map(|p| Self::pgn_from_path(p))
             .zip(iter::repeat(String::from("[]")))

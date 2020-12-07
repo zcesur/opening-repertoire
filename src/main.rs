@@ -13,6 +13,7 @@ fn try_main() -> Result<()> {
     let mut opening_tree = Tree::new();
     let repertoire_color = Color::White;
     let max_moves = 10;
+    let inode_max_depth = 8;
     let starting_moves = ["e4", "c5"]
         .iter()
         .map(|s| s.parse::<SanPlus>().map_err(|e| e.into()))
@@ -25,7 +26,7 @@ fn try_main() -> Result<()> {
     );
     reader.read_all(&mut visitor)?;
     opening_tree.prune(repertoire_color);
-    print!("{}", opening_tree.pgn(repertoire_color));
+    print!("{}", opening_tree.pgn(repertoire_color, inode_max_depth));
     Ok(())
 }
 
