@@ -1,7 +1,12 @@
 [package]
 name = "opening-repertoire"
-version = "0.1.0"
-authors = ["Zafer Cesur <17045339+zcesur@users.noreply.github.com>"]
+version = "0.2.0"
+description = "Generates a chess opening repertoire from a PGN"
+repository = "https://github.com/zcesur/opening-repertoire"
+readme = "README.md"
+authors = ["Zafer Cesur"]
+categories = ["games"]
+keywords = ["chess", "pgn", "opening", "repertoire"]
 edition = "2018"
 
 [dependencies]
