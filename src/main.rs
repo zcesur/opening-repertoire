@@ -22,7 +22,7 @@ fn main() {
             Arg::with_name("path")
                 .short("p")
                 .long("path")
-                .help("path/to/input.pgn")
+                .help("path/to/games.pgn")
                 .required(true)
                 .takes_value(true)
                 .value_name("FILE"),
