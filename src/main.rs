@@ -58,8 +58,13 @@ fn main() {
         process::exit(1);
     });
 
-    if let Err(e) = opening_repertoire::run(config) {
-        eprintln!("Application error: {}", e);
-        process::exit(1);
+    match opening_repertoire::run(&config) {
+        Err(e) => {
+            eprintln!("Application error: {}", e);
+            process::exit(1);
+        }
+        Ok(tree) => {
+            print!("{}", tree.pgn(config.color, config.inode_max_depth));
+        }
     }
 }

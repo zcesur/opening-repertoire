@@ -7,7 +7,7 @@ use std::fs::File;
 use clap::ArgMatches;
 use pgn_reader::{BufferedReader, Color, SanPlus};
 
-use repertoire::GameVisitor;
+use repertoire::{ColoredSanPlus, GameVisitor};
 use tree::Tree;
 
 type BoxedError = Box<dyn Error>;
@@ -72,7 +72,7 @@ fn starting_moves_from_str(s: &str) -> Result<Vec<SanPlus>> {
         .collect()
 }
 
-pub fn run(config: Config) -> Result<()> {
+pub fn run(config: &Config) -> Result<Tree<ColoredSanPlus>> {
     let file = File::open(&config.pgn_path)?;
     let mut reader = BufferedReader::new(file);
     let mut opening_tree = Tree::new();
@@ -84,6 +84,5 @@ pub fn run(config: Config) -> Result<()> {
     );
     reader.read_all(&mut visitor)?;
     opening_tree.prune(config.color);
-    print!("{}", opening_tree.pgn(config.color, config.inode_max_depth));
-    Ok(())
+    Ok(opening_tree)
 }
