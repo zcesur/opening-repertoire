@@ -1,7 +1,7 @@
 OpeningRepertoire
 ==========
 
-OpeningRepertoire is a command line tool that generates chess opening repertoires from chess games in PGN format. The output can be imported into a study tool that lets you analyze (e.g. lichess) or practice (e.g. chessable) your repertoire.
+OpeningRepertoire is a command line tool that generates opening repertoires from chess games in PGN format. The output can be imported into a study tool that lets you analyze (e.g. lichess) or practice (e.g. chessable) your repertoire.
 
 
 Installation
@@ -12,11 +12,10 @@ Use the package manager [cargo](https://doc.rust-lang.org/cargo/getting-started/
 cargo install --git https://github.com/zcesur/opening-repertoire
 ```
 
-Documentation
--------------
+Usage
+-----
 ```
-USAGE:
-    opening-repertoire [OPTIONS] --color <COLOR> --path <FILE>
+opening-repertoire [OPTIONS] --color <COLOR> --path <FILE>
 
 FLAGS:
     -h, --help       Prints help information
