@@ -167,11 +167,32 @@ where
     pub fn pgn(&self, color: Color, inode_max_depth: usize) -> String {
         self.paths(color, inode_max_depth)
             .iter()
-            .map(|p| Self::pgn_from_path(p))
-            .zip(iter::repeat(String::from("[]")))
-            .map(|(b, h)| format!("{}\n{}", h, b))
+            .map(|p| {
+                format!(
+                    "[Event \"{}\"]\n{}",
+                    Self::title_from_path(p, color, inode_max_depth),
+                    Self::pgn_from_path(p)
+                )
+            })
             .collect::<Vec<_>>()
             .join("\n")
+    }
+
+    fn dots(color: Color) -> String {
+        match color {
+            Color::White => String::from("."),
+            Color::Black => String::from("..."),
+        }
+    }
+
+    pub fn title_from_path(path: &[&T], color: Color, inode_max_depth: usize) -> String {
+        path.iter()
+            .enumerate()
+            .take(inode_max_depth - 1)
+            .filter(|(_, x)| x.color() != color)
+            .last()
+            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, Self::dots(x.color()), x.to_string()))
+            .unwrap_or(String::from("Variation"))
     }
 
     pub fn pgn_from_path(path: &[&T]) -> String {
