@@ -25,6 +25,10 @@ where
         }
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.arena.is_empty()
+    }
+
     pub fn is_root(&self, idx: NodeIndex) -> bool {
         idx == 0
     }
@@ -135,7 +139,11 @@ where
     }
 
     pub fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&T>> {
-        self.paths_rec(color, inode_max_depth, 0, &[])
+        if self.is_empty() {
+            vec![]
+        } else {
+            self.paths_rec(color, inode_max_depth, 0, &[])
+        }
     }
 
     fn paths_rec<'a>(
