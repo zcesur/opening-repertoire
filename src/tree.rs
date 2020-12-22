@@ -163,13 +163,13 @@ impl Tree<Move> {
             .take(inode_max_depth - 1)
             .filter(|(_, x)| x.color != color)
             .last()
-            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, x.dots(), x.to_string()))
+            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, x.dots(), x.san_plus))
             .unwrap_or(String::from("Variation"))
     }
 
     fn pgn_from_path(path: &[&Move]) -> String {
         path.iter()
-            .map(|&x| x.to_string())
+            .map(|&x| x.san_plus.to_string())
             .collect::<Vec<_>>()
             .chunks(2)
             .enumerate()

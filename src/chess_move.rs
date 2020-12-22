@@ -1,5 +1,3 @@
-use std::fmt;
-
 use pgn_reader::{Color, SanPlus};
 
 pub struct Move {
@@ -37,11 +35,5 @@ impl Move {
 impl PartialEq for Move {
     fn eq(&self, other: &Self) -> bool {
         self.color == other.color && self.san_plus == other.san_plus
-    }
-}
-
-impl fmt::Display for Move {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.san_plus)
     }
 }
