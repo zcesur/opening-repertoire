@@ -35,10 +35,11 @@ impl Config {
             None => Ok(vec![]),
         }?;
 
-        let color = matches
-            .value_of("color")
-            .ok_or("invalid color".into())
-            .and_then(color_from_str)?;
+        let color = match matches.value_of("color") {
+            Some("white") => Ok(Color::White),
+            Some("black") => Ok(Color::Black),
+            _ => Err("invalid color"),
+        }?;
 
         let max_moves = matches
             .value_of("max_moves")
@@ -57,14 +58,6 @@ impl Config {
             max_moves,
             inode_max_depth,
         })
-    }
-}
-
-fn color_from_str(s: &str) -> Result<Color> {
-    match s {
-        "white" => Ok(Color::White),
-        "black" => Ok(Color::Black),
-        _ => Err("invalid color".into()),
     }
 }
 
