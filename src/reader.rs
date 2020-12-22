@@ -69,14 +69,13 @@ impl<'a> Visitor for PGNVisitor<'a> {
             return;
         }
 
-        let val = Move {
-            color: self.turn,
-            san_plus,
-        };
+        let val = Move::new(self.turn, san_plus);
         let new_cursor = match self.cursor {
             Some(idx) => self.tree.get_child_or_insert(val, idx),
             None => self.tree.get_root_or_insert(val),
         };
+        self.tree.inc_frequency(new_cursor);
+
         self.cursor = Some(new_cursor);
         self.plies += 1;
         self.turn = !self.turn;

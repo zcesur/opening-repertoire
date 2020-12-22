@@ -80,18 +80,17 @@ where
     fn is_leaf(&self, idx: NodeIndex) -> bool {
         self.arena[idx].children.is_empty()
     }
-
-    fn size(&self, idx: NodeIndex) -> usize {
-        1 + self.arena[idx]
-            .children
-            .iter()
-            .fold(0, |acc, &c| acc + self.size(c))
-    }
 }
 
 impl Tree<Move> {
+    pub fn inc_frequency(&mut self, idx: NodeIndex) {
+        self.arena[idx].val.inc_frequency()
+    }
+
     pub fn prune(&mut self, color: Color) {
-        let sizes: Vec<_> = (0..self.arena.len()).map(|i| self.size(i)).collect();
+        let freqs: Vec<_> = (0..self.arena.len())
+            .map(|i| self.arena[i].val.frequency())
+            .collect();
         for node in &mut self.arena {
             if color == node.val.color {
                 continue;
@@ -100,7 +99,7 @@ impl Tree<Move> {
             let pruned_children: Vec<_> = node
                 .children
                 .iter()
-                .max_by_key(|&&i| sizes[i])
+                .max_by_key(|&&i| freqs[i])
                 .iter()
                 .map(|&&i| i)
                 .collect();

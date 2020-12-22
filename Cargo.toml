@@ -1,6 +1,6 @@
 [package]
 name = "opening-repertoire"
-version = "1.0.0"
+version = "1.0.1"
 description = "Build opening repertoires from chess games in PGN format"
 repository = "https://github.com/zcesur/opening-repertoire"
 readme = "README.md"
