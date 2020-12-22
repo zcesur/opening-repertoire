@@ -27,7 +27,7 @@ impl Config {
     pub fn new(matches: ArgMatches) -> Result<Config> {
         let pgn_path = matches
             .value_of("path")
-            .ok_or::<BoxedError>("invalid path".into())
+            .ok_or("invalid path")
             .map(|x| x.to_owned())?;
 
         let starting_moves = match matches.value_of("starting_moves") {
@@ -37,18 +37,18 @@ impl Config {
 
         let color = matches
             .value_of("color")
-            .ok_or::<BoxedError>("invalid color".into())
+            .ok_or("invalid color".into())
             .and_then(color_from_str)?;
 
         let max_moves = matches
             .value_of("max_moves")
-            .unwrap_or("10")
-            .parse::<usize>()?;
+            .ok_or::<BoxedError>("invalid max_moves".into())
+            .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
         let inode_max_depth = matches
             .value_of("inode_max_depth")
-            .unwrap_or("8")
-            .parse::<usize>()?;
+            .ok_or::<BoxedError>("invalid inode_max_depth".into())
+            .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
         Ok(Config {
             pgn_path,

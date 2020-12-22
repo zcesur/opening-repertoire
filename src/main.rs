@@ -39,17 +39,19 @@ fn main() {
             Arg::with_name("max_moves")
                 .short("m")
                 .long("max_moves")
-                .help("Maximum number of moves (default: 10)")
+                .help("Maximum number of moves")
                 .takes_value(true)
-                .value_name("NUM"),
+                .value_name("NUM")
+                .default_value("10"),
         )
         .arg(
             Arg::with_name("inode_max_depth")
                 .short("d")
                 .long("inode_max_depth")
-                .help("Maximum depth of variations that stem from internal (non-leaf) nodes (default: 8)")
+                .help("Maximum depth of variations that stem from internal (non-leaf) nodes")
                 .takes_value(true)
-                .value_name("NUM"),
+                .value_name("NUM")
+                .default_value("8"),
         )
         .get_matches();
 
