@@ -3,7 +3,7 @@ use std::iter;
 
 use pgn_reader::Color;
 
-use crate::color;
+use crate::chess_move::Move;
 
 pub struct Tree<T>
 where
@@ -89,14 +89,11 @@ where
     }
 }
 
-impl<T> Tree<T>
-where
-    T: PartialEq + color::Colored + ToString,
-{
+impl Tree<Move> {
     pub fn prune(&mut self, color: Color) {
         let sizes: Vec<_> = (0..self.arena.len()).map(|i| self.size(i)).collect();
         for node in &mut self.arena {
-            if color == node.val.color() {
+            if color == node.val.color {
                 continue;
             }
 
@@ -126,7 +123,7 @@ where
             .join("\n")
     }
 
-    fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&T>> {
+    fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&Move>> {
         if self.is_empty() {
             vec![]
         } else {
@@ -139,13 +136,13 @@ where
         color: Color,
         inode_max_depth: usize,
         idx: NodeIndex,
-        prefix: &[&'a T],
-    ) -> Vec<Vec<&'a T>> {
+        prefix: &[&'a Move],
+    ) -> Vec<Vec<&'a Move>> {
         let node = &self.arena[idx];
         let val = &node.val;
-        let new_prefix: Vec<&T> = prefix.iter().map(|&p| p).chain(iter::once(val)).collect();
+        let new_prefix: Vec<&Move> = prefix.iter().map(|&p| p).chain(iter::once(val)).collect();
 
-        let mut paths = if node.val.color() == color
+        let mut paths = if node.val.color == color
             && (self.is_internal(idx) && self.depth(idx) < inode_max_depth || self.is_leaf(idx))
         {
             vec![new_prefix.clone()]
@@ -161,17 +158,17 @@ where
         paths
     }
 
-    fn title_from_path(path: &[&T], color: Color, inode_max_depth: usize) -> String {
+    fn title_from_path(path: &[&Move], color: Color, inode_max_depth: usize) -> String {
         path.iter()
             .enumerate()
             .take(inode_max_depth - 1)
-            .filter(|(_, x)| x.color() != color)
+            .filter(|(_, x)| x.color != color)
             .last()
-            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, color::dots(x.color()), x.to_string()))
+            .map(|(i, x)| format!("{}{}{}", i / 2 + 1, x.dots(), x.to_string()))
             .unwrap_or(String::from("Variation"))
     }
 
-    fn pgn_from_path(path: &[&T]) -> String {
+    fn pgn_from_path(path: &[&Move]) -> String {
         path.iter()
             .map(|&x| x.to_string())
             .collect::<Vec<_>>()

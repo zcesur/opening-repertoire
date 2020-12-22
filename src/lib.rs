@@ -1,4 +1,4 @@
-mod color;
+mod chess_move;
 mod reader;
 mod tree;
 
@@ -8,7 +8,7 @@ use std::fs::File;
 use clap::ArgMatches;
 use pgn_reader::{BufferedReader, Color, SanPlus};
 
-use color::ColoredSanPlus;
+use chess_move::Move;
 use reader::PGNVisitor;
 use tree::Tree;
 
@@ -74,7 +74,7 @@ fn starting_moves_from_str(s: &str) -> Result<Vec<SanPlus>> {
         .collect()
 }
 
-pub fn run(config: &Config) -> Result<Tree<ColoredSanPlus>> {
+pub fn run(config: &Config) -> Result<Tree<Move>> {
     let file = File::open(&config.pgn_path)?;
     let mut reader = BufferedReader::new(file);
     let mut opening_tree = Tree::new();

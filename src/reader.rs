@@ -1,6 +1,6 @@
 use pgn_reader::{Color, SanPlus, Skip, Visitor};
 
-use crate::color::ColoredSanPlus;
+use crate::chess_move::Move;
 use crate::tree::{NodeIndex, Tree};
 
 pub struct PGNVisitor<'a> {
@@ -9,14 +9,14 @@ pub struct PGNVisitor<'a> {
     skip: Skip,
     repertoire_color: Color,
     max_moves: usize,
-    tree: &'a mut Tree<ColoredSanPlus>,
+    tree: &'a mut Tree<Move>,
     cursor: Option<NodeIndex>,
     starting_moves: &'a [SanPlus],
 }
 
 impl<'a> PGNVisitor<'a> {
     pub fn new(
-        tree: &'a mut Tree<ColoredSanPlus>,
+        tree: &'a mut Tree<Move>,
         starting_moves: &'a [SanPlus],
         repertoire_color: Color,
         max_moves: usize,
@@ -69,7 +69,10 @@ impl<'a> Visitor for PGNVisitor<'a> {
             return;
         }
 
-        let val = ColoredSanPlus(self.turn, san_plus);
+        let val = Move {
+            color: self.turn,
+            san_plus,
+        };
         let new_cursor = match self.cursor {
             Some(idx) => self.tree.get_child_or_insert(val, idx),
             None => self.tree.get_root_or_insert(val),
