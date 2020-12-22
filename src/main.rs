@@ -53,6 +53,20 @@ fn main() {
                 .value_name("NUM")
                 .default_value("8"),
         )
+        .arg(
+            Arg::with_name("output_type")
+                .short("t")
+                .long("output_type")
+                .help("Type of output: either 'pgn' or 'tree'")
+                .takes_value(true)
+                .value_name("STRING")
+                .default_value("pgn"),
+        )
+        .arg(
+            Arg::with_name("disable-pruning")
+                .long("disable-pruning")
+                .help("By default, moves are pruned with respect to the repertoire color such that there is a single response for each opponent move")
+        )
         .get_matches();
 
     let config = Config::new(matches).unwrap_or_else(|err| {
@@ -65,8 +79,8 @@ fn main() {
             eprintln!("Application error: {}", e);
             process::exit(1);
         }
-        Ok(tree) => {
-            print!("{}", tree.pgn(config.color, config.inode_max_depth));
+        Ok(res) => {
+            print!("{}", res);
         }
     }
 }

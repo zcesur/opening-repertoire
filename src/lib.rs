@@ -8,12 +8,16 @@ use std::fs::File;
 use clap::ArgMatches;
 use pgn_reader::{BufferedReader, Color, SanPlus};
 
-use chess_move::Move;
 use reader::PGNVisitor;
 use tree::Tree;
 
 type BoxedError = Box<dyn Error>;
 type Result<T> = std::result::Result<T, BoxedError>;
+
+pub enum OutputType {
+    PGN,
+    Tree,
+}
 
 pub struct Config {
     pub pgn_path: String,
@@ -21,6 +25,8 @@ pub struct Config {
     pub color: Color,
     pub max_moves: usize,
     pub inode_max_depth: usize,
+    pub output_type: OutputType,
+    pub prune: bool,
 }
 
 impl Config {
@@ -51,12 +57,20 @@ impl Config {
             .ok_or::<BoxedError>("invalid inode_max_depth".into())
             .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
+        let output_type = match matches.value_of("output_type") {
+            Some("pgn") => Ok(OutputType::PGN),
+            Some("tree") => Ok(OutputType::Tree),
+            _ => Err("invalid output_type"),
+        }?;
+
         Ok(Config {
             pgn_path,
             starting_moves,
             color,
             max_moves,
             inode_max_depth,
+            output_type,
+            prune: !matches.is_present("disable-pruning"),
         })
     }
 }
@@ -67,7 +81,7 @@ fn starting_moves_from_str(s: &str) -> Result<Vec<SanPlus>> {
         .collect()
 }
 
-pub fn run(config: &Config) -> Result<Tree<Move>> {
+pub fn run(config: &Config) -> Result<String> {
     let file = File::open(&config.pgn_path)?;
     let mut reader = BufferedReader::new(file);
     let mut opening_tree = Tree::new();
@@ -78,6 +92,13 @@ pub fn run(config: &Config) -> Result<Tree<Move>> {
         config.max_moves,
     );
     reader.read_all(&mut visitor)?;
-    opening_tree.prune(config.color);
-    Ok(opening_tree)
+
+    if config.prune {
+        opening_tree.prune(config.color);
+    }
+
+    Ok(match config.output_type {
+        OutputType::PGN => opening_tree.pgn(config.color, config.inode_max_depth),
+        OutputType::Tree => opening_tree.to_string(),
+    })
 }
