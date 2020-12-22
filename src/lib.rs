@@ -36,7 +36,7 @@ impl Config {
             .ok_or("invalid path")
             .map(|x| x.to_owned())?;
 
-        let starting_moves = match matches.value_of("starting_moves") {
+        let starting_moves = match matches.value_of("starting-moves") {
             Some(s) => starting_moves_from_str(s),
             None => Ok(vec![]),
         }?;
@@ -48,19 +48,19 @@ impl Config {
         }?;
 
         let max_moves = matches
-            .value_of("max_moves")
-            .ok_or::<BoxedError>("invalid max_moves".into())
+            .value_of("max-moves")
+            .ok_or::<BoxedError>("invalid max-moves".into())
             .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
         let inode_max_depth = matches
-            .value_of("inode_max_depth")
-            .ok_or::<BoxedError>("invalid inode_max_depth".into())
+            .value_of("inode-max-depth")
+            .ok_or::<BoxedError>("invalid inode-max-depth".into())
             .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
-        let output_type = match matches.value_of("output_type") {
+        let output_type = match matches.value_of("output-type") {
             Some("pgn") => Ok(OutputType::PGN),
             Some("tree") => Ok(OutputType::Tree),
-            _ => Err("invalid output_type"),
+            _ => Err("invalid output-type"),
         }?;
 
         Ok(Config {

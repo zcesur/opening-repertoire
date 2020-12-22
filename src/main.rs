@@ -28,35 +28,35 @@ fn main() {
                 .value_name("FILE"),
         )
         .arg(
-            Arg::with_name("starting_moves")
+            Arg::with_name("starting-moves")
                 .short("s")
-                .long("starting_moves")
+                .long("starting-moves")
                 .help("Filter games by some comma-separated starting moves, e.g. 'e4,c5'")
                 .takes_value(true)
                 .value_name("STRING"),
         )
         .arg(
-            Arg::with_name("max_moves")
+            Arg::with_name("max-moves")
                 .short("m")
-                .long("max_moves")
+                .long("max-moves")
                 .help("Maximum number of moves")
                 .takes_value(true)
                 .value_name("NUM")
                 .default_value("10"),
         )
         .arg(
-            Arg::with_name("inode_max_depth")
+            Arg::with_name("inode-max-depth")
                 .short("d")
-                .long("inode_max_depth")
+                .long("inode-max-depth")
                 .help("Maximum depth of variations that stem from internal (non-leaf) nodes")
                 .takes_value(true)
                 .value_name("NUM")
                 .default_value("8"),
         )
         .arg(
-            Arg::with_name("output_type")
+            Arg::with_name("output-type")
                 .short("t")
-                .long("output_type")
+                .long("output-type")
                 .help("Type of output: either 'pgn' or 'tree'")
                 .takes_value(true)
                 .value_name("STRING")

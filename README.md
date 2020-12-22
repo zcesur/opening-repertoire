@@ -25,11 +25,11 @@ FLAGS:
 
 OPTIONS:
     -c, --color <COLOR>              Repertoire color: either 'white' or 'black'
-    -d, --inode_max_depth <NUM>      Maximum depth of variations that stem from internal (non-leaf) nodes [default: 8]
-    -m, --max_moves <NUM>            Maximum number of moves [default: 10]
-    -t, --output_type <STRING>       Type of output: either 'pgn' or 'tree' [default: pgn]
+    -d, --inode-max-depth <NUM>      Maximum depth of variations that stem from internal (non-leaf) nodes [default: 8]
+    -m, --max-moves <NUM>            Maximum number of moves [default: 10]
+    -t, --output-type <STRING>       Type of output: either 'pgn' or 'tree' [default: pgn]
     -p, --path <FILE>                path/to/games.pgn
-    -s, --starting_moves <STRING>    Filter games by some comma-separated starting moves, e.g. 'e4,c5'
+    -s, --starting-moves <STRING>    Filter games by some comma-separated starting moves, e.g. 'e4,c5'
 ```
 
 Example
