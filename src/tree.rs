@@ -5,6 +5,33 @@ use pgn_reader::Color;
 
 use crate::chess_move::Move;
 
+// TODO: use struct wrapper for improved type safety
+pub type NodeIndex = usize;
+
+pub struct Node<T>
+where
+    T: PartialEq,
+{
+    idx: NodeIndex,
+    val: T,
+    parent: Option<NodeIndex>,
+    children: Vec<NodeIndex>,
+}
+
+impl<T> Node<T>
+where
+    T: PartialEq,
+{
+    fn new(idx: NodeIndex, val: T) -> Self {
+        Self {
+            idx,
+            val,
+            parent: None,
+            children: vec![],
+        }
+    }
+}
+
 pub struct Tree<T>
 where
     T: PartialEq,
@@ -211,33 +238,6 @@ where
         match self.get_root() {
             None => Ok(()),
             Some(idx) => self.fmt_rec(&idx, f, "", true),
-        }
-    }
-}
-
-// TODO: use struct wrapper for improved type safety
-pub type NodeIndex = usize;
-
-pub struct Node<T>
-where
-    T: PartialEq,
-{
-    idx: NodeIndex,
-    val: T,
-    parent: Option<NodeIndex>,
-    children: Vec<NodeIndex>,
-}
-
-impl<T> Node<T>
-where
-    T: PartialEq,
-{
-    fn new(idx: NodeIndex, val: T) -> Self {
-        Self {
-            idx,
-            val,
-            parent: None,
-            children: vec![],
         }
     }
 }
