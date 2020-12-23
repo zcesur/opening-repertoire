@@ -71,7 +71,10 @@ where
     }
 
     fn get_root(&self) -> Option<NodeIndex> {
-        self.arena.get(0).map(|node| node.idx)
+        self.arena
+            .iter()
+            .find(|node| node.parent.is_none())
+            .map(|node| node.idx)
     }
 
     fn insert_child(&mut self, val: T, parent: NodeIndex) -> NodeIndex {
@@ -94,12 +97,8 @@ where
         }
     }
 
-    fn is_empty(&self) -> bool {
-        self.arena.is_empty()
-    }
-
     fn is_root(&self, idx: NodeIndex) -> bool {
-        idx == 0
+        self.get_root().map(|root| idx == root).unwrap_or(false)
     }
 
     fn is_internal(&self, idx: NodeIndex) -> bool {
@@ -152,10 +151,9 @@ impl Tree<Move> {
     }
 
     fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&Move>> {
-        if self.is_empty() {
-            vec![]
-        } else {
-            self.paths_rec(color, inode_max_depth, 0, &[])
+        match self.get_root() {
+            None => vec![],
+            Some(idx) => self.paths_rec(color, inode_max_depth, idx, &[]),
         }
     }
 
