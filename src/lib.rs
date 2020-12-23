@@ -15,7 +15,9 @@ type BoxedError = Box<dyn Error>;
 type Result<T> = std::result::Result<T, BoxedError>;
 
 pub enum OutputType {
-    PGN,
+    Pgn,
+    Json,
+    JsonPretty,
     Tree,
 }
 
@@ -58,7 +60,9 @@ impl Config {
             .and_then(|x| x.parse::<usize>().map_err(|e| e.into()))?;
 
         let output_type = match matches.value_of("output-type") {
-            Some("pgn") => Ok(OutputType::PGN),
+            Some("pgn") => Ok(OutputType::Pgn),
+            Some("json") => Ok(OutputType::Json),
+            Some("json-pretty") => Ok(OutputType::JsonPretty),
             Some("tree") => Ok(OutputType::Tree),
             _ => Err("invalid output-type"),
         }?;
@@ -97,8 +101,10 @@ pub fn run(config: &Config) -> Result<String> {
         opening_tree.prune(config.color);
     }
 
-    Ok(match config.output_type {
-        OutputType::PGN => opening_tree.pgn(config.color, config.inode_max_depth),
-        OutputType::Tree => opening_tree.to_string(),
-    })
+    match config.output_type {
+        OutputType::Pgn => Ok(opening_tree.pgn(config.color, config.inode_max_depth)),
+        OutputType::Json => serde_json::to_string(&opening_tree).map_err(|e| e.into()),
+        OutputType::JsonPretty => serde_json::to_string_pretty(&opening_tree).map_err(|e| e.into()),
+        OutputType::Tree => Ok(opening_tree.to_string()),
+    }
 }

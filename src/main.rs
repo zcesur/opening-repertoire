@@ -57,7 +57,7 @@ fn main() {
             Arg::with_name("output-type")
                 .short("t")
                 .long("output-type")
-                .help("Type of output: either 'pgn' or 'tree'")
+                .help("Type of output: either 'pgn', 'json', 'json-pretty' or 'tree'")
                 .takes_value(true)
                 .value_name("STRING")
                 .default_value("pgn"),

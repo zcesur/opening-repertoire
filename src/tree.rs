@@ -2,6 +2,8 @@ use std::fmt;
 use std::iter;
 
 use pgn_reader::Color;
+use serde;
+use serde::ser::{Serialize, SerializeMap, Serializer};
 
 use crate::chess_move::Move;
 
@@ -208,7 +210,7 @@ impl Tree<Move> {
 
 impl<T> Tree<T>
 where
-    T: PartialEq + std::fmt::Display,
+    T: std::fmt::Display + PartialEq,
 {
     fn fmt_rec(
         &self,
@@ -232,12 +234,83 @@ where
 
 impl<T> fmt::Display for Tree<T>
 where
-    T: PartialEq + std::fmt::Display,
+    T: std::fmt::Display + PartialEq,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.get_root() {
             None => Ok(()),
             Some(idx) => self.fmt_rec(&idx, f, "", true),
         }
+    }
+}
+
+impl Serialize for Tree<Move> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self.get_root() {
+            None => serializer.serialize_none(),
+            Some(idx) => {
+                let node_ref = NodeRef {
+                    idx,
+                    arena: &self.arena,
+                };
+                node_ref.serialize(serializer)
+            }
+        }
+    }
+}
+
+struct NodeRef<'a, T>
+where
+    T: PartialEq,
+{
+    idx: NodeIndex,
+    arena: &'a Vec<Node<T>>,
+}
+
+impl<'a, T> Serialize for NodeRef<'a, T>
+where
+    T: Serialize + PartialEq,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let node = &self.arena[self.idx];
+        let mut map = serializer.serialize_map(None)?;
+        map.serialize_entry("move", &node.val)?;
+        map.serialize_entry(
+            "children",
+            &NodeRefs {
+                ids: &node.children,
+                arena: &self.arena,
+            },
+        )?;
+        map.end()
+    }
+}
+
+struct NodeRefs<'a, T>
+where
+    T: PartialEq,
+{
+    ids: &'a Vec<NodeIndex>,
+    arena: &'a Vec<Node<T>>,
+}
+
+impl<'a, T> Serialize for NodeRefs<'a, T>
+where
+    T: Serialize + PartialEq,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(self.ids.iter().map(|&idx| NodeRef {
+            idx,
+            arena: &self.arena,
+        }))
     }
 }

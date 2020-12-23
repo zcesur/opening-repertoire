@@ -1,6 +1,7 @@
 use std::fmt;
 
 use pgn_reader::{Color, SanPlus};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 pub struct Move {
     pub color: Color,
@@ -43,5 +44,17 @@ impl PartialEq for Move {
 impl fmt::Display for Move {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{} ({})", self.san_plus, self.frequency)
+    }
+}
+
+impl Serialize for Move {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut s = serializer.serialize_struct("Move", 2)?;
+        s.serialize_field("san_plus", &self.san_plus.to_string())?;
+        s.serialize_field("frequency", &self.frequency)?;
+        s.end()
     }
 }

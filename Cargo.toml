@@ -1,6 +1,6 @@
 [package]
 name = "opening-repertoire"
-version = "1.1.0"
+version = "1.2.0"
 description = "Build opening repertoires from chess games in PGN format"
 repository = "https://github.com/zcesur/opening-repertoire"
 readme = "README.md"
@@ -12,3 +12,5 @@ edition = "2018"
 [dependencies]
 pgn-reader = "0.15.0"
 clap = "2.33.3"
+serde = { version = "1.0.118", features = ["derive"] }
+serde_json = "1.0.60"
