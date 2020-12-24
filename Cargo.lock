@@ -88,9 +88,9 @@ checksum = "1482821306169ec4d07f6aca392a4681f66c75c9918aa49641a2595db64053cb"
 
 [[package]]
 name = "mach"
-version = "0.2.3"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86dd2487cdfea56def77b88438a2c915fb45113c5319bfe7e14306ca4cd0b0e1"
+checksum = "b823e83b2affd8f40a9ee8c29dbc56404c1e34cd2710921f2801e2cf29527afa"
 dependencies = [
  "libc",
 ]
@@ -129,8 +129,7 @@ dependencies = [
 [[package]]
 name = "pgn-reader"
 version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8e90cf09a5b70f71a03bd139e252f59067c1065b3104cfddae97c092df2d66c"
+source = "git+https://github.com/niklasf/rust-pgn-reader.git?rev=aa8d542#aa8d54297bb815a9d5eafecb94dbbc2c38b35a47"
 dependencies = [
  "btoi",
  "memchr",
@@ -206,9 +205,9 @@ dependencies = [
 
 [[package]]
 name = "slice-deque"
-version = "0.2.4"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffddf594f5f597f63533d897427a570dbaa9feabaaa06595b74b71b7014507d7"
+checksum = "31ef6ee280cdefba6d2d0b4b78a84a1c1a3f3a4cec98c2d4231c8bc225de0f25"
 dependencies = [
  "libc",
  "mach",
