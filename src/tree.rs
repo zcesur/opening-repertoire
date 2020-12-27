@@ -39,6 +39,7 @@ where
     T: PartialEq,
 {
     arena: Vec<Node<T>>,
+    roots: Vec<NodeIndex>,
 }
 
 impl<T> Tree<T>
@@ -46,7 +47,10 @@ where
     T: PartialEq,
 {
     pub fn new() -> Self {
-        Self { arena: vec![] }
+        Self {
+            arena: vec![],
+            roots: vec![],
+        }
     }
 
     pub fn get_child_or_insert(&mut self, val: T, parent: NodeIndex) -> NodeIndex {
@@ -57,9 +61,9 @@ where
     }
 
     pub fn get_root_or_insert(&mut self, val: T) -> NodeIndex {
-        match self.get_root() {
+        match self.get_root(&val) {
             Some(idx) => idx,
-            None => self.insert_node(val),
+            None => self.insert_root(val),
         }
     }
 
@@ -70,17 +74,26 @@ where
             .map(|node| node.idx)
     }
 
-    fn get_root(&self) -> Option<NodeIndex> {
-        self.arena
-            .iter()
-            .find(|node| node.parent.is_none())
+    fn get_root(&self, val: &T) -> Option<NodeIndex> {
+        self.roots()
+            .find(|node| &node.val == val)
             .map(|node| node.idx)
+    }
+
+    fn roots(&self) -> impl Iterator<Item = &Node<T>> {
+        self.roots.iter().map(move |&i| &self.arena[i])
     }
 
     fn insert_child(&mut self, val: T, parent: NodeIndex) -> NodeIndex {
         let idx = self.insert_node(val);
         self.arena[parent].children.push(idx);
         self.arena[idx].parent = Some(parent);
+        idx
+    }
+
+    fn insert_root(&mut self, val: T) -> NodeIndex {
+        let idx = self.insert_node(val);
+        self.roots.push(idx);
         idx
     }
 
@@ -98,7 +111,7 @@ where
     }
 
     fn is_root(&self, idx: NodeIndex) -> bool {
-        self.get_root().map(|root| idx == root).unwrap_or(false)
+        self.arena[idx].parent == None
     }
 
     fn is_internal(&self, idx: NodeIndex) -> bool {
@@ -134,6 +147,14 @@ impl Tree<Move> {
 
             node.children = pruned_children;
         }
+
+        if let Some(max_root) = self
+            .roots()
+            .max_by_key(|node| node.val.frequency())
+            .map(|node| node.idx)
+        {
+            self.roots.retain(|i| i == &max_root);
+        }
     }
 
     pub fn pgn(&self, color: Color, inode_max_depth: usize) -> String {
@@ -151,10 +172,9 @@ impl Tree<Move> {
     }
 
     fn paths(&self, color: Color, inode_max_depth: usize) -> Vec<Vec<&Move>> {
-        match self.get_root() {
-            None => vec![],
-            Some(idx) => self.paths_rec(color, inode_max_depth, idx, &[]),
-        }
+        self.roots()
+            .flat_map(|node| self.paths_rec(color, inode_max_depth, node.idx, &[]))
+            .collect()
     }
 
     fn paths_rec<'a>(
@@ -235,10 +255,8 @@ where
     T: std::fmt::Display + PartialEq,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.get_root() {
-            None => Ok(()),
-            Some(idx) => self.fmt_rec(&idx, f, "", true),
-        }
+        self.roots()
+            .try_fold((), |_, node| self.fmt_rec(&node.idx, f, "", true))
     }
 }
 
@@ -247,16 +265,10 @@ impl Serialize for Tree<Move> {
     where
         S: Serializer,
     {
-        match self.get_root() {
-            None => serializer.serialize_none(),
-            Some(idx) => {
-                let node_ref = NodeRef {
-                    idx,
-                    arena: &self.arena,
-                };
-                node_ref.serialize(serializer)
-            }
-        }
+        serializer.collect_seq(self.roots().map(|node| NodeRef {
+            idx: node.idx,
+            arena: &self.arena,
+        }))
     }
 }
 
